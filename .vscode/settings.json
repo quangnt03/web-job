@@ -1,0 +1,11 @@
+{
+  "path-autocomplete.pathMappings": {
+    "@services": "${folder}/services",
+    "@routes": "${folder}/routes",
+    "@models": "${folder}/models",
+    "@controllers": "${folder}/controllers",
+    "@configs": "${folder}/configs",
+    "@utils": "${folder}/utils",
+    "@constants": "${folder}/constants",
+  }
+}
