@@ -1,23 +1,23 @@
 require("module-alias/register");
+require("express-async-errors");
 require("dotenv").config();
 
 const express = require("express");
 const morgan = require("morgan");
-const { environmentConfig } = require("@configs");
 const cors = require("cors");
-const connectMongoDb = require("@utils/ConnectMongoDB");
-const rootRouter = require("./routes/rootRouter");
+const { environmentConfig } = require("./configs");
+const connectMongoDb = require("./utils/ConnectMongoDB");
+const rootRouter = require("./routes");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
 
-app.use(cors());
-
-app.use("/", rootRouter);
+app.use(rootRouter);
 
 connectMongoDb()
   .then(() => {
@@ -25,7 +25,7 @@ connectMongoDb()
       console.log(`listening on port ${environmentConfig.PORT}`);
     });
   })
-  .catch((error) => {
+  .catch((err) => {
     console.log("[ERROR] Failed to listen");
     process.exit(1);
   });
