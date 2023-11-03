@@ -27,6 +27,5 @@ connectMongoDb()
   })
   .catch((err) => {
     console.log("[ERROR] Failed to listen");
-    console.log(err);
     process.exit(1);
   });
