@@ -10,9 +10,8 @@ module.exports = {
   },
 
   async createUserProfile(user, profile) {
-    console.log(user, profile);
     const newUserProfile = await ProfileModel.create({
-      user,
+      owner: user,
       ...profile,
     });
 

@@ -1,67 +1,119 @@
-const { StatusCodes, ReasonPhrases } = require('http-status-codes');
-const asyncHandler = require('express-async-handler');
-
-const UserModel = require('../models/user.model');
-const userService = require('../services/user.service');
-const generateToken = require('../utils/GenerateToken');
-const InvalidArgumentError = require('../exceptions/InvalidArgumentException');
-const ResourceNotFoundException = require('../exceptions/ResourceNotFoundException');
-const UnauthorizedException = require('../exceptions/UnauthorizedException');
+const { StatusCodes } = require("http-status-codes");
+const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const UserModel = require("../models/user.model");
+const userService = require("../services/user.service");
+const { encrypt } = require("../configs");
+const tokenModel = require("../models/refreshToken.model");
 
 module.exports = {
   createUser: asyncHandler(async (req, res) => {
     const userWithEmail = await userService.findUserByEmail(req.body.email);
     if (userWithEmail) {
       return res.status(400).json({
-        success: false,
-        field: 'email',
-        msg: 'Email already exists',
+        field: "email",
+        message: "Email already exists",
       });
     }
     const newUser = await UserModel.create(req.body);
     const user = newUser.toObject();
-    return res
-      .status(StatusCodes.CREATED)
-      .json({
-        status: ReasonPhrases.CREATED,
-        data: {
-          id: user._id,
-          email: user.email,
-          role: user.role,
-          isActive: user.isActive,
-        },
-      });
+    return res.status(StatusCodes.CREATED).json({
+      id: user._id,
+    });
   }),
 
   login: asyncHandler(async (req, res) => {
     const userWithEmail = await userService.findUserByEmail(req.body.email);
 
     if (!userWithEmail) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        field: 'email',
-        msg: 'Email not found',
+        field: "email",
+        message: "Email not found",
       });
     }
 
-    const isMatchedPassword = await userWithEmail.comparePassword(req.body.password);
+    const isMatchedPassword = await userWithEmail.comparePassword(
+      req.body.password
+    );
 
     if (!isMatchedPassword) {
-      return res.status(401).json({
-        success: false,
-        field: 'password',
-        msg: 'Incorrect password',
+      return res.status(400).json({
+        field: "password",
+        message: "Incorrect password",
       });
     }
 
-    const token = generateToken({
-      id: userWithEmail.id,
-      role: userWithEmail.role,
-    });
+    const accessToken = jwt.sign(
+      {
+        id: userWithEmail._id,
+        role: userWithEmail.role,
+      },
+      encrypt.jwtSecretAccess,
+      { expiresIn: "1h" }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: userWithEmail._id },
+      encrypt.jwtSecretRefresh
+    );
 
     return res.status(200).json({
-      status: ReasonPhrases.ACCEPTED,
-      token,
+      user: userWithEmail._id,
+      accessToken,
+      refreshToken,
     });
+  }),
+
+  refreshToken: asyncHandler(async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh token not found" });
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, encrypt.jwtSecretRefresh);
+
+      const userRefreshToken = await tokenModel.findOne({
+        user: decoded.id,
+        token: refreshToken,
+      });
+
+      if (userRefreshToken) {
+        return res.status(403).json({ message: "Expired refresh token" });
+      }
+
+      const expiredToken = new tokenModel({
+        user: decoded.id,
+        token: refreshToken,
+      });
+
+      await expiredToken.save();
+
+      const user = await userService.findUserById(decoded.id);
+
+      const newRefreshToken = jwt.sign(
+        { id: decoded.id },
+        encrypt.jwtSecretRefresh
+      );
+
+      const accessToken = jwt.sign(
+        {
+          id: user._id,
+          role: user.role,
+        },
+        encrypt.jwtSecretAccess,
+        { expiresIn: "1h" }
+      );
+
+      return res.status(201).json({
+        user: decoded.id,
+        accessToken,
+        refreshToken: newRefreshToken,
+      });
+    } catch (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
   }),
 };

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const companySchema = mongoose.Schema({
-  recruiter: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },

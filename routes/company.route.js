@@ -1,19 +1,21 @@
-const { Router } = require('express');
+const { Router } = require("express");
 
-const companyCtr = require('../controllers/company.ctr');
-const allowTo = require('../middlewares/allowTo');
-const { roles } = require('../constants');
-const companyValidation = require('../middlewares/validations/company.validation');
-const validate = require('../middlewares/ValidationHandler');
+const companyCtr = require("../controllers/company.ctr");
+const allowTo = require("../middlewares/allowTo");
+const { roles } = require("../constants");
+const companyValidation = require("../middlewares/validations/company.validation");
+const validate = require("../middlewares/ValidationHandler");
 
 const router = Router();
 
+router.get("/", companyCtr.getCompanyByAccount);
+
 router.post(
-  '/',
+  "/",
   allowTo(roles.company),
   companyValidation,
   validate,
-  companyCtr.createCompany,
+  companyCtr.createCompany
 );
 
 module.exports = router;

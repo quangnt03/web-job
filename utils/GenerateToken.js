@@ -1,7 +1,8 @@
-const jwt = require('jsonwebtoken');
-const { encrypt } = require('../configs');
+const jwt = require("jsonwebtoken");
+const config = require("../configs");
 
-module.exports = (payload) => {
-  const token = jwt.sign(payload, encrypt.jwtSecret, { expiresIn: '1d' });
-  return token;
+module.exports = function (payload) {
+  return jwt.sign(payload, config.encrypt.jwtSecretAccess, {
+    expiresIn: "15s",
+  });
 };

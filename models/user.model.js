@@ -1,41 +1,54 @@
 /* eslint-disable no-shadow */
 /* eslint-disable consistent-return */
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
-const { roles } = require('../constants');
-const configs = require('../configs');
+const { roles } = require("../constants");
+const configs = require("../configs");
 
-const userSchema = mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    required: true,
-    enum: [roles.admin, roles.company, roles.employee],
-  },
+const userSchema = mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: [roles.admin, roles.company, roles.employee],
+    },
 
-  isActive: {
-    type: Boolean,
-    required: true,
-    default: true,
-  },
-}, {
-  toJSON: { virtuals: true },
-});
+    isActive: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
 
-userSchema.pre('save', function (next) {
+    associatedProfile: {
+      type: mongoose.Types.ObjectId,
+      ref: "UserProfile",
+    },
+
+    associatedCompany: {
+      type: mongoose.Types.ObjectId,
+      ref: "Company",
+    },
+  },
+  {
+    toJSON: { virtuals: true },
+  }
+);
+
+userSchema.pre("save", function (next) {
   const user = this;
 
   // only hash the password if it has been modified (or is new)
-  if (!user.isModified('password')) return next();
+  if (!user.isModified("password")) return next();
 
   // generate a salt
   bcrypt.genSalt(configs.salt, (err, salt) => {
@@ -54,10 +67,13 @@ userSchema.pre('save', function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  const isMatchedPassword = await bcrypt.compare(candidatePassword, this.password);
+  const isMatchedPassword = await bcrypt.compare(
+    candidatePassword,
+    this.password
+  );
   return isMatchedPassword;
 };
 
-const userModel = mongoose.model('User', userSchema);
+const userModel = mongoose.model("User", userSchema);
 
 module.exports = userModel;

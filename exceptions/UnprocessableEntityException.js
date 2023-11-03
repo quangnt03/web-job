@@ -1,7 +1,7 @@
-const { StatusCodes, ReasonPhrases } = require('http-status-codes');
+const { StatusCodes, ReasonPhrases } = require("http-status-codes");
 
 class UnprocessableEntityException extends Error {
-  constructor(message) {
+  constructor(error, message) {
     super(message);
     this.name = this.constructor.name;
     this.status = StatusCodes.UNPROCESSABLE_ENTITY;
