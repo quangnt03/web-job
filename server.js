@@ -7,6 +7,7 @@ const { environmentConfig } = require("@configs");
 const cors = require("cors");
 const connectMongoDb = require("@utils/ConnectMongoDB");
 const rootRouter = require("./routes/rootRouter");
+const jobExpireScheduler = require("./jobExpireScheduler");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(morgan("dev"));
 
 app.use(cors());
 
+// app.use("/", jobExpireScheduler);
 app.use("/", rootRouter);
 
 connectMongoDb()

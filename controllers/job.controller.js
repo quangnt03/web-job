@@ -93,7 +93,6 @@ module.exports = {
       const companyCreatedJobs = await JobModel.find({
         company: req.body.company,
       });
-      console.log(companyCreatedJobs);
       if (!companyCreatedJobs) {
         throw new Error("Jobs not found");
       }
@@ -102,6 +101,58 @@ module.exports = {
       return res
         .status(400)
         .json({ success: false, error: "An error occurred" });
+    }
+  },
+
+  //Remove job in "Manage Jobs" tab for recruiters
+  async removeJob(req, res) {
+    try {
+      const jobId = req.params.jobId;
+      const removedJob = await JobModel.findByIdAndUpdate(
+        jobId,
+        { status: "removed" },
+        { new: true }
+      );
+      if (removedJob) {
+        return res.status(200).json({ message: "Job removed successfully" });
+      } else {
+        return res.status(404).json({ error: "Job not found" });
+      }
+    } catch (error) {
+      console.error("Error removing job:", error);
+      return res.status(500).json({ error: "Server error" });
+    }
+  },
+
+  async updateJob(req, res) {
+    const jobId = req.params.jobId;
+    try {
+      console.log("start");
+      const editedJob = await JobModel.findById(jobId);
+
+      if (!editedJob) {
+        return res.status(404).json({ error: "Job not found" });
+      }
+      (editedJob.title = req.body.title),
+        (editedJob.company = req.body.company),
+        (editedJob.logo = req.body.logo),
+        (editedJob.createdAt = req.body.createdAt),
+        (editedJob.closedDate = req.body.closedDate),
+        (editedJob.createdBy = req.body.createdBy),
+        (editedJob.salary = req.body.salary),
+        (editedJob.location = req.body.location),
+        (editedJob.field = req.body.field),
+        (editedJob.position = req.body.position),
+        (editedJob.maxApplicants = req.body.maxApplicants),
+        (editedJob.description = req.body.description),
+        (editedJob.status = "active"),
+        (editedJob.applicants = req.body.applicants),
+        await editedJob.save();
+
+      return res.status(200).json({ message: "Job updated successfully" });
+    } catch (error) {
+      console.error("Error updating job:", error);
+      return res.status(500).json({ error: "Server error" });
     }
   },
 };
