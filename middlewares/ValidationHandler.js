@@ -7,7 +7,7 @@ const validate = async (req, res, next) => {
   if (!errors.isEmpty()) {
     const returnErrors = errors
       .array()
-      .map(({ message, path }) => ({ message, path }));
+      .map(({ msg, path }) => ({ message: msg, path }));
     return res.status(400).json({ errors: returnErrors });
   }
   return next();
