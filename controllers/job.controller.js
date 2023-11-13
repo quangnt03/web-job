@@ -1,4 +1,5 @@
 const JobModel = require("../models/job.model");
+const JobFieldModel = require("../models/field.model");
 module.exports = {
   // Get all jobs
   async getAllJobs(req, res) {
@@ -17,6 +18,16 @@ module.exports = {
     }
   },
 
+  //Get job field list
+  async getJobFields(req, res) {
+    try {
+      const jobFields = await JobFieldModel.find();
+      res.json(jobFields);
+    } catch (error) {
+      console.error("Error fetching job fields:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
   // Get data of a job by its ID
   async getJobById(req, res) {
     try {
@@ -124,6 +135,7 @@ module.exports = {
     }
   },
 
+  //Edit job details
   async updateJob(req, res) {
     const jobId = req.params.jobId;
     try {
