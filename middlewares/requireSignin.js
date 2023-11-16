@@ -17,8 +17,10 @@ module.exports = (req, res, next) => {
   }
 
   try {
-    const decodedToken = jwt.verify(token, encrypt.jwtSecretAccess);
+    console.log(encrypt);
+    const decodedToken = jwt.verify(token, encrypt.jwtSecretRefresh);
     req.user = decodedToken;
+    console.log("sign in confirmed");
     return next();
   } catch (error) {
     return res
