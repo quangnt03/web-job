@@ -5,8 +5,10 @@ const jobSchema = new mongoose.Schema(
   {
     title: String,
     company: String,
+    logo: String,
     createdAt: Date,
     closedDate: Date,
+    createdBy: String,
     salary: String,
     location: String,
     field: String,

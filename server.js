@@ -4,10 +4,11 @@ require("dotenv").config();
 
 const express = require("express");
 const morgan = require("morgan");
+const { environmentConfig } = require("@configs");
 const cors = require("cors");
-const { environmentConfig } = require("./configs");
-const connectMongoDb = require("./utils/ConnectMongoDB");
+const connectMongoDb = require("@utils/ConnectMongoDB");
 const rootRouter = require("./routes");
+const jobExpireScheduler = require("./jobExpireScheduler");
 
 const app = express();
 
@@ -17,8 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
 
-app.use(rootRouter);
-
+// app.use("/", jobExpireScheduler);
+app.use("/", rootRouter);
 connectMongoDb()
   .then(() => {
     app.listen(environmentConfig.PORT, () => {

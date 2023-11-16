@@ -1,12 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const fieldSchema = mongoose.Schema({
-  name: {
-    type: String,
-    unique: true,
-  },
+const jobFieldSchema = new Schema({
+  field: String,
 });
 
-const fieldModel = mongoose.model('Field', fieldSchema);
+const JobFieldModel = mongoose.model("JobField", jobFieldSchema);
 
-module.exports = fieldModel;
+module.exports = JobFieldModel;

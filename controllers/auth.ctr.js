@@ -32,18 +32,16 @@ module.exports = {
         message: "Email not found",
       });
     }
-
     const isMatchedPassword = await userWithEmail.comparePassword(
       req.body.password
     );
-
     if (!isMatchedPassword) {
       return res.status(400).json({
         field: "password",
         message: "Incorrect password",
       });
     }
-
+    console.log(encrypt);
     const accessToken = jwt.sign(
       {
         id: userWithEmail._id,
@@ -52,7 +50,7 @@ module.exports = {
       encrypt.jwtSecretAccess,
       { expiresIn: "1h" }
     );
-
+    console.log("done");
     const refreshToken = jwt.sign(
       { id: userWithEmail._id },
       encrypt.jwtSecretRefresh
