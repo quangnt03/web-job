@@ -8,12 +8,15 @@ const applicationSchema = new mongoose.Schema(
       required: true,
     },
     applicationDate: {
-      type: Date,
+      type: String,
       required: true,
     },
     attachment: {
-      type: String,
+      type: Buffer,
       required: true,
+    },
+    notes: {
+      type: String,
     },
     status: {
       type: String,
