@@ -14,14 +14,12 @@ const router = Router();
 
 router.use("/job", jobRouter);
 router.use("/auth", authRoutes);
-
-router.use(requireSignin);
+router.use("/company", companyRoutes);
 
 router.use("/account", accountRoutes);
 router.use("/employee", profileRoutes);
-router.use("/company", companyRoutes);
 router.use("/applicant", applicantRouter);
-
+router.use(requireSignin);
 router.use(exceptionHandler);
 
 module.exports = router;

@@ -2,7 +2,10 @@ const multer = require("multer");
 const path = require("path");
 const mongoose = require("mongoose");
 const ApplicationModel = require("../models/application.model");
+const userProfileModel = require("../models/profile.model");
+const RecruitmentNewsModel = require("../models/job.model");
 
+//Apply for a job
 const applyJob = async (req, res) => {
   try {
     const storage = multer.memoryStorage();
@@ -13,15 +16,19 @@ const applyJob = async (req, res) => {
         console.error("Error uploading files:", err);
         return res.status(500).json({ error: "File upload failed" });
       }
+
       //Send data to MongoDB
       try {
         const files = req.files;
-        const { notes } = req.body;
+
+        const { notes, userId } = req.body;
+        console.log(userId);
         const today = new Date();
         const applicationDate = today.toLocaleDateString().split("T")[0];
-        console.log("Start uploading to database");
+        const { jobId } = req.params;
         const application = new ApplicationModel({
-          owner: "655274fd867a26ac2e27c00d",
+          owner: userId,
+          appliedJob: jobId,
           applicationDate,
           attachment: files.map((file) => file.buffer),
           notes,
@@ -29,6 +36,13 @@ const applyJob = async (req, res) => {
         });
 
         await application.save();
+        //Add user id to the applicants' array in RecruitentNewsModel
+
+        const recruitmentNews = await RecruitmentNewsModel.findOneAndUpdate(
+          { _id: jobId },
+          { $addToSet: { applicants: userId } },
+          { new: true }
+        );
 
         return res.json({
           message: "File(s) uploaded and application saved successfully",
@@ -45,13 +59,3 @@ const applyJob = async (req, res) => {
 };
 
 module.exports = { applyJob };
-
-// const storage = multer.diskStorage({
-//   destination: function (req, file, callback) {
-//     const uploadsPath = path.join(__dirname, "..", "uploads");
-//     callback(null, uploadsPath);
-//   },
-//   filename: function (req, file, callback) {
-//     callback(null, file.originalname);
-//   },
-// });

@@ -24,7 +24,7 @@ module.exports = {
 
   login: asyncHandler(async (req, res) => {
     const userWithEmail = await userService.findUserByEmail(req.body.email);
-
+    console.log("User", userWithEmail);
     if (!userWithEmail) {
       return res.status(400).json({
         success: false,
@@ -55,9 +55,9 @@ module.exports = {
       { id: userWithEmail._id },
       encrypt.jwtSecretRefresh
     );
-
     return res.status(200).json({
       user: userWithEmail._id,
+      role: userWithEmail.role,
       accessToken,
       refreshToken,
     });

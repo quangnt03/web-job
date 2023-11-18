@@ -167,4 +167,27 @@ module.exports = {
       return res.status(500).json({ error: "Server error" });
     }
   },
+  //Decline a job application
+  async declineJob(req, res) {
+    try {
+      console.log("start");
+      const applicationId = req.params.applicationId;
+      const jobId = req.params.jobId;
+      console.log("application id", applicationId);
+      console.log("jobId", jobId);
+      const declinedApplication = await ApplicationModel.findByIdAndUpdate(
+        applicationId,
+        { status: "declined" },
+        { new: true }
+      );
+      if (declinedApplication) {
+        return res.status(200).json({ message: "Application declined" });
+      } else {
+        return res.status(404).json({ error: "Application not found" });
+      }
+    } catch (error) {
+      console.error("Error declining job application:", error);
+      return res.status(500).json({ error: "Server error" });
+    }
+  },
 };
